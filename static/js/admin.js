@@ -1,7 +1,7 @@
 let localQueue = [];
 let knownRequestIds = new Set();
 let isInitialLoad = true;
-let requestsEnabled = true;
+let requestsEnabled = false;
 
 // Web Audio API Synthesizer Chime para novos pedidos
 function playNotificationSound() {

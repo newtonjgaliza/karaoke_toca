@@ -1,4 +1,4 @@
-let requestsEnabled = true;
+let requestsEnabled = false;
 
 // Inicializa a escuta de mudanças de configuração em tempo real no Supabase
 async function initSettingsSync() {
