@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Karaokê A Toca</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff3c3c">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="static/images/toca.jpg">
+
+    <!-- Google Fonts: Outfit for clean interface, DotGothic16 for the retro dot-matrix font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/admin.css">
+    <link rel="icon" type="image/jpeg" href="static/images/toca.jpg">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="admin-layout">
+        <!-- Sidebar or Header Panel -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="static/images/toca.jpg" alt="Logo Karaoke" class="logo">
+                <div class="brand-text">
+                    <h1 class="retro-font">A TOCA</h1>
+                    <span class="badge">HOST PANEL</span>
+                </div>
+            </div>
+
+            <!-- Queue Statistics -->
+            <div class="stats-panel">
+                <div class="stat-card" id="stat-pending">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Na Fila</div>
+                </div>
+                <div class="stat-card" id="stat-playing">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Tocando</div>
+                </div>
+                <div class="stat-card" id="stat-completed">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Cantadas</div>
+                </div>
+            </div>
+
+            <!-- Sound Controller -->
+            <div class="audio-toggle-card">
+                <label class="switch-container">
+                    <input type="checkbox" id="audioToggle" checked>
+                    <span class="slider"></span>
+                </label>
+                <div class="audio-label-group">
+                    <span class="audio-title">Alertas Sonoros</span>
+                    <span class="audio-subtitle">Som para novos pedidos</span>
+                </div>
+            </div>
+
+            <!-- Quick Action controls -->
+            <div class="sidebar-actions">
+                <!-- Compartilhamento do link para Clientes -->
+                <div class="tunnel-card">
+                    <div class="tunnel-header">
+                        <span class="tunnel-title">Acesso dos Clientes</span>
+                        <span class="status-dot active"></span>
+                    </div>
+                    <div>
+                        <div class="tunnel-link-group">
+                            <input type="text" id="clientUrlVal" readonly class="tunnel-input-url">
+                            <button onclick="copyClientUrl()" class="btn-copy" title="Copiar link dos clientes">📋</button>
+                        </div>
+                        <div class="qr-wrapper">
+                            <img id="clientQrCode" src="" alt="QR Code" class="qr-image">
+                            <span class="qr-label">Escaneie para pedir música</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="clearQueue()" class="btn-secondary" style="margin-bottom: 0.5rem; border-color: var(--accent-red); color: var(--accent-red);" onmouseover="this.style.backgroundColor='var(--accent-red)'; this.style.color='#fff'; this.style.boxShadow='0 0 15px rgba(255, 60, 60, 0.4)'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent-red)'; this.style.boxShadow='none'">
+                    <span>Limpar Fila</span>
+                </button>
+                <button onclick="clearHistory()" class="btn-secondary">
+                    <span>Limpar Histórico</span>
+                </button>
+                <a href="index.html" target="_blank" class="btn-link">Abrir Tela de Pedidos ↗</a>
+            </div>
+
+            <footer class="sidebar-footer" style="font-size: 0.7rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%;">
+                <p>Newton Galiza. Todos os direitos reservados</p>
+            </footer>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <h2 class="section-title">Fila de Apresentações</h2>
+                
+                <!-- Toggle Requests Section -->
+                <div class="request-toggle-group" style="display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
+                    <button id="btnAllowRequests" onclick="toggleRequests(true)" class="btn-toggle-req" style="padding: 0.6rem 1.2rem; border-radius: 10px; font-family: var(--font-primary); font-weight: 700; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02); color: var(--text-muted); transition: all 0.3s ease;">
+                        🟢 Liberar Pedidos
+                    </button>
+                    <button id="btnBlockRequests" onclick="toggleRequests(false)" class="btn-toggle-req" style="padding: 0.6rem 1.2rem; border-radius: 10px; font-family: var(--font-primary); font-weight: 700; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02); color: var(--text-muted); transition: all 0.3s ease;">
+                        🔴 Bloquear Pedidos
+                    </button>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchBar" placeholder="Filtrar por nome, música ou referência..." oninput="filterQueue()">
+                </div>
+            </header>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <table class="queue-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Música</th>
+                            <th>Referência</th>
+                            <th>Informações Extras</th>
+                            <th class="actions-header">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueTableBody">
+                        <!-- Loaded dynamically via JS -->
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="loading-spinner"></div>
+                                Carregando fila de músicas...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Supabase Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="static/js/supabase-config.js"></script>
+    <script src="static/js/admin.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado com sucesso no escopo:', reg.scope))
+                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>

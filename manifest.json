@@ -1,0 +1,22 @@
+{
+  "name": "Karaokê A Toca",
+  "short_name": "A Toca",
+  "description": "Fila de Karaokê do A Toca - Peça suas músicas direto do celular!",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0d0e15",
+  "theme_color": "#ff3c3c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "static/images/toca.jpg",
+      "sizes": "150x150",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "static/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

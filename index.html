@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer Pedido - Karaokê A Toca</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff3c3c">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="static/images/toca.jpg">
+
+    <!-- Google Fonts: Outfit for clean interface, DotGothic16 for the retro dot-matrix font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/public.css">
+    <link rel="icon" type="image/jpeg" href="static/images/toca.jpg">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="container">
+        <!-- Logo and Header -->
+        <header class="header">
+            <div class="logo-wrapper">
+                <img src="static/images/toca.jpg" alt="Logo Karaokê A Toca" class="logo">
+            </div>
+            <h1 class="neon-title">KARAOKÊ A TOCA</h1>
+            <p class="subtitle">Escolha sua música e prepare a garganta!</p>
+        </header>
+
+        <!-- Form Card -->
+        <main class="form-card">
+            <form id="requestForm" autocomplete="off">
+                <!-- Nome -->
+                <div class="input-group">
+                    <label for="name">Seu Nome</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="name" name="name" required placeholder="ex. joao">
+                        <span class="focus-border"></span>
+                    </div>
+                </div>
+
+                <!-- Música -->
+                <div class="input-group">
+                    <label for="song">Nome da Música</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="song" name="song" required placeholder="ex: saint seiya">
+                        <span class="focus-border"></span>
+                    </div>
+                </div>
+
+                <!-- Referência -->
+                <div class="input-group">
+                    <label for="reference">Referência (Cantor/Anime/Filme)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reference" name="reference" placeholder="ex: cavaleiros do zodiaco">
+                        <span class="focus-border"></span>
+                    </div>
+                </div>
+
+                <!-- Informações Extras -->
+                <div class="input-group">
+                    <label for="extra_info">Informações Extras</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="extra_info" name="extra_info" placeholder="ex: versão do anime">
+                        <span class="focus-border"></span>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <span class="btn-text">Enviar Pedido</span>
+                    <span class="btn-glow"></span>
+                </button>
+            </form>
+        </main>
+        
+        <footer class="footer">
+            <p>Newton Galiza. Todos os direitos reservados</p>
+        </footer>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">🎶</div>
+            <h2>Pedido Enviado!</h2>
+            <p>Sua música foi adicionada à fila. Fique atento ao painel para saber quando cantar!</p>
+            <button class="btn-modal-close" onclick="closeModal()">OK, quero outra!</button>
+        </div>
+    </div>
+
+    <!-- Blocked Modal -->
+    <div id="blockedModal" class="modal">
+        <div class="modal-content" style="border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255, 111, 71, 0.3);">
+            <div class="modal-icon">🔒</div>
+            <h2>Pedidos Bloqueados</h2>
+            <p>Os pedidos de música estão temporariamente suspensos. Pedidos serão liberados em breve!</p>
+            <button class="btn-modal-close" style="border-color: var(--accent); color: var(--accent);" onmouseover="this.style.backgroundColor='var(--accent)'; this.style.color='#fff'; this.style.boxShadow='0 0 15px var(--accent)'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent)'; this.style.boxShadow='none'" onclick="closeBlockedModal()">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Supabase Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="static/js/supabase-config.js"></script>
+    <script src="static/js/public.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Registra o Service worker com o caminho relativo correto para GitHub Pages
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado com sucesso no escopo:', reg.scope))
+                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>
