@@ -37,8 +37,11 @@ function playNotificationSound() {
     }
 }
 
+let isFetchingQueue = false;
 // Busca a fila de pedidos do Supabase
 async function fetchQueue() {
+    if (isFetchingQueue) return;
+    isFetchingQueue = true;
     try {
         const { data, error } = await supabaseClient
             .from('requests')
@@ -87,6 +90,8 @@ async function fetchQueue() {
         updateStats();
     } catch (error) {
         console.error('Erro ao buscar a fila do Supabase:', error);
+    } finally {
+        isFetchingQueue = false;
     }
 }
 
@@ -102,7 +107,10 @@ function initRealtimeSync() {
                 fetchQueue();
             }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+            console.log('Realtime Requests Status:', status);
+            if (err) console.error('Realtime Requests Error:', err);
+        });
 
     // 2. Escuta mudanças nas configurações globais ('settings')
     supabaseClient
@@ -117,11 +125,17 @@ function initRealtimeSync() {
                 }
             }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+            console.log('Realtime Settings Status:', status);
+            if (err) console.error('Realtime Settings Error:', err);
+        });
 }
 
+let isFetchingStatus = false;
 // Busca o status inicial do bloqueador de pedidos
 async function fetchRequestStatus() {
+    if (isFetchingStatus) return;
+    isFetchingStatus = true;
     try {
         const { data, error } = await supabaseClient
             .from('settings')
@@ -136,6 +150,8 @@ async function fetchRequestStatus() {
         }
     } catch (error) {
         console.error('Erro ao buscar status dos pedidos:', error);
+    } finally {
+        isFetchingStatus = false;
     }
 }
 
@@ -436,4 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchQueue();
     fetchRequestStatus();
     initRealtimeSync();
+
+    // Polling fallback to ensure real-time updates even if Supabase Realtime is disabled or fails
+    setInterval(fetchQueue, 3000);
+    setInterval(fetchRequestStatus, 5000);
 });

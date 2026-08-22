@@ -29,7 +29,10 @@ async function initSettingsSync() {
                 }
             }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+            console.log('Realtime Client Settings Status:', status);
+            if (err) console.error('Realtime Client Settings Error:', err);
+        });
 }
 
 // Atualiza o estado visual do botão de envio baseado no bloqueio de pedidos
@@ -115,4 +118,22 @@ function closeBlockedModal() {
 // Inicializa a sincronização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
     initSettingsSync();
+
+    // Polling fallback to ensure settings updates even if Supabase Realtime is disabled or fails
+    setInterval(async () => {
+        try {
+            const { data, error } = await supabaseClient
+                .from('settings')
+                .select('requests_enabled')
+                .eq('id', 1)
+                .single();
+
+            if (!error && data) {
+                requestsEnabled = data.requests_enabled;
+                updateRequestsUI();
+            }
+        } catch (err) {
+            console.error("Erro no polling de configurações:", err);
+        }
+    }, 5000);
 });
