@@ -50,6 +50,22 @@ function updateRequestsUI() {
     }
 }
 
+const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos em milissegundos
+
+// Retorna o tempo restante de cooldown em milissegundos (ou 0 se não estiver em cooldown)
+function getRemainingCooldownTime() {
+    const lastRequestTime = localStorage.getItem('lastRequestTime');
+    if (!lastRequestTime) return 0;
+    
+    const elapsed = Date.now() - parseInt(lastRequestTime, 10);
+    const remaining = COOLDOWN_MS - elapsed;
+    return remaining > 0 ? remaining : 0;
+}
+
+function closeCooldownModal() {
+    document.getElementById('cooldownModal').style.display = 'none';
+}
+
 // Evento de envio do formulário
 document.getElementById('requestForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -57,6 +73,18 @@ document.getElementById('requestForm').addEventListener('submit', async function
     // Se os pedidos estão bloqueados pelo Admin, abre o modal de bloqueio
     if (!requestsEnabled) {
         document.getElementById('blockedModal').style.display = 'flex';
+        return;
+    }
+
+    // Verifica se o dispositivo está no período de cooldown de 5 minutos
+    const remainingTime = getRemainingCooldownTime();
+    if (remainingTime > 0) {
+        const minutes = Math.floor(remainingTime / 60000);
+        const seconds = Math.floor((remainingTime % 60000) / 1000);
+        const formattedTime = `${minutes}m ${seconds}s`;
+        
+        document.getElementById('cooldownMessage').textContent = `Você já enviou um pedido recentemente. Para evitar sobrecarregar a fila, por favor aguarde mais ${formattedTime} antes de pedir outra música!`;
+        document.getElementById('cooldownModal').style.display = 'flex';
         return;
     }
 
@@ -87,6 +115,9 @@ document.getElementById('requestForm').addEventListener('submit', async function
             ]);
 
         if (error) throw error;
+
+        // Salva o timestamp do pedido no localStorage para o cooldown
+        localStorage.setItem('lastRequestTime', Date.now().toString());
 
         // Abre o modal de sucesso
         document.getElementById('successModal').style.display = 'flex';

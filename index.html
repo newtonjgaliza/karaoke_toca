@@ -103,6 +103,16 @@
         </div>
     </div>
 
+    <!-- Cooldown Modal -->
+    <div id="cooldownModal" class="modal">
+        <div class="modal-content" style="border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255, 111, 71, 0.3);">
+            <div class="modal-icon">⏳</div>
+            <h2>Aguarde um pouco</h2>
+            <p id="cooldownMessage">Você já fez um pedido recentemente. Por favor, aguarde alguns minutos antes de pedir a próxima música.</p>
+            <button class="btn-modal-close" style="border-color: var(--accent); color: var(--accent);" onmouseover="this.style.backgroundColor='var(--accent)'; this.style.color='#fff'; this.style.boxShadow='0 0 15px var(--accent)'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--accent)'; this.style.boxShadow='none'" onclick="closeCooldownModal()">Entendido</button>
+        </div>
+    </div>
+
     <!-- Supabase Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="static/js/supabase-config.js"></script>
