@@ -446,14 +446,78 @@ function escapeQuote(text) {
     return text.replace(/'/g, "\\'");
 }
 
+// ==========================================
+// SISTEMA DE AUTENTICAÇÃO SIMPLES (FRONT-END)
+// ==========================================
+const ADMIN_PASSWORD_HASH = "aca3e621a4ad37f877e1799a985926587d9ddac419630b368fb90c39cbb7f197"; // hash de 'tocaadmin'
+let isSyncInitialized = false;
+let pollingIntervals = [];
+
+// Função auxiliar para gerar hash SHA-256
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Tentativa de login
+async function tryLogin() {
+    const passwordInput = document.getElementById('adminPassword').value;
+    const errorMsg = document.getElementById('loginError');
+    const hash = await sha256(passwordInput);
+
+    if (hash === ADMIN_PASSWORD_HASH) {
+        localStorage.setItem('admin_authenticated', 'true');
+        showAdminPanel();
+    } else {
+        errorMsg.textContent = "Senha incorreta!";
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+    }
+}
+
+// Logout do painel
+function logout() {
+    if (!confirm('Deseja realmente sair do painel?')) return;
+    localStorage.removeItem('admin_authenticated');
+    location.reload();
+}
+
+// Revela painel e inicializa a escuta/sincronização de dados
+function showAdminPanel() {
+    const loginOverlay = document.getElementById('loginOverlay');
+    const adminLayout = document.getElementById('adminLayout');
+    
+    if (loginOverlay) loginOverlay.style.display = 'none';
+    if (adminLayout) adminLayout.style.display = 'grid';
+    
+    if (!isSyncInitialized) {
+        isSyncInitialized = true;
+        setupSharing();
+        fetchQueue();
+        fetchRequestStatus();
+        initRealtimeSync();
+
+        // Polling fallback to ensure real-time updates even if Supabase Realtime is disabled or fails
+        pollingIntervals.push(setInterval(fetchQueue, 3000));
+        pollingIntervals.push(setInterval(fetchRequestStatus, 5000));
+    }
+}
+
 // Inicializações ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
-    setupSharing();
-    fetchQueue();
-    fetchRequestStatus();
-    initRealtimeSync();
-
-    // Polling fallback to ensure real-time updates even if Supabase Realtime is disabled or fails
-    setInterval(fetchQueue, 3000);
-    setInterval(fetchRequestStatus, 5000);
+    const isAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
+    if (isAuthenticated) {
+        showAdminPanel();
+    } else {
+        const loginOverlay = document.getElementById('loginOverlay');
+        const adminLayout = document.getElementById('adminLayout');
+        const passwordInput = document.getElementById('adminPassword');
+        
+        if (loginOverlay) loginOverlay.style.display = 'flex';
+        if (adminLayout) adminLayout.style.display = 'none';
+        if (passwordInput) passwordInput.focus();
+    }
 });
+

@@ -20,8 +20,25 @@
     <link rel="icon" type="image/jpeg" href="static/images/toca.jpg">
 </head>
 <body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay" style="display: flex;">
+        <div class="login-box">
+            <img src="static/images/toca.jpg" alt="Logo" class="login-logo">
+            <div class="brand-text">
+                <h2 class="retro-font" style="margin: 0; color: #fff; text-shadow: 0 0 8px var(--secondary);">A TOCA</h2>
+                <span class="badge" style="font-size: 0.65rem; font-weight: 800; color: var(--primary); letter-spacing: 2px; text-transform: uppercase;">PAINEL ADMIN</span>
+            </div>
+            <div class="login-input-group">
+                <label for="adminPassword">Senha de Acesso</label>
+                <input type="password" id="adminPassword" placeholder="Digite a senha..." onkeydown="if(event.key === 'Enter') tryLogin()" />
+            </div>
+            <button onclick="tryLogin()" class="btn-login">Entrar</button>
+            <div id="loginError" class="login-error-msg"></div>
+        </div>
+    </div>
+
     <div class="stars"></div>
-    <div class="admin-layout">
+    <div class="admin-layout" id="adminLayout" style="display: none;">
         <!-- Sidebar or Header Panel -->
         <aside class="sidebar">
             <div class="brand">
@@ -87,6 +104,9 @@
                     <span>Limpar Histórico</span>
                 </button>
                 <a href="index.html" target="_blank" class="btn-link">Abrir Tela de Pedidos ↗</a>
+                <button onclick="logout()" class="btn-secondary btn-logout" style="margin-top: 0.5rem;">
+                    <span>Sair</span>
+                </button>
             </div>
 
 
