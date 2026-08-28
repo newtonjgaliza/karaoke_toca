@@ -302,16 +302,10 @@ function renderQueueTable() {
     });
 }
 
-// Ação: Inicia uma música (coloca em status 'playing', altera as outras 'playing' para 'completed', abre busca no YouTube)
+// Ação: Inicia uma música (coloca em status 'playing', abre busca no YouTube)
 async function playSong(id, song, reference) {
     try {
-        // 1. Atualiza qualquer música que esteja tocando agora para "concluída"
-        await supabaseClient
-            .from('requests')
-            .update({ status: 'completed' })
-            .eq('status', 'playing');
-
-        // 2. Coloca esta música em status 'playing'
+        // Coloca esta música em status 'playing'
         const { error } = await supabaseClient
             .from('requests')
             .update({ status: 'playing' })
@@ -322,7 +316,7 @@ async function playSong(id, song, reference) {
         // Atualiza a visualização local
         fetchQueue();
         
-        // 3. Abre busca do YouTube em nova aba
+        // Abre busca do YouTube em nova aba
         const searchQuery = `karaoke ${song} ${reference}`.trim();
         const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
         window.open(youtubeUrl, '_blank');
