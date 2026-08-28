@@ -50,7 +50,7 @@ function updateRequestsUI() {
     }
 }
 
-const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos em milissegundos
+const COOLDOWN_MS = 20 * 60 * 1000; // 20 minutos em milissegundos
 
 // Retorna o tempo restante de cooldown em milissegundos (ou 0 se não estiver em cooldown)
 function getRemainingCooldownTime() {
@@ -76,7 +76,7 @@ document.getElementById('requestForm').addEventListener('submit', async function
         return;
     }
 
-    // Verifica se o dispositivo está no período de cooldown de 5 minutos
+    // Verifica se o dispositivo está no período de cooldown de 20 minutos
     const remainingTime = getRemainingCooldownTime();
     if (remainingTime > 0) {
         const minutes = Math.floor(remainingTime / 60000);
