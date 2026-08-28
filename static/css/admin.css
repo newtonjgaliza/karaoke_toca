@@ -134,7 +134,6 @@ body {
 }
 
 #stat-pending { border-left: 4px solid var(--secondary); }
-#stat-playing { border-left: 4px solid var(--accent); }
 #stat-completed { border-left: 4px solid var(--primary); }
 
 .stat-value {
@@ -144,7 +143,6 @@ body {
 }
 
 #stat-pending .stat-value { color: var(--secondary); text-shadow: 0 0 8px rgba(0, 240, 255, 0.3); }
-#stat-playing .stat-value { color: var(--accent); text-shadow: 0 0 8px rgba(57, 255, 20, 0.3); }
 #stat-completed .stat-value { color: var(--primary); text-shadow: 0 0 8px rgba(255, 0, 127, 0.3); }
 
 .stat-label {
@@ -345,8 +343,14 @@ input:checked + .slider:before {
     text-align: left;
 }
 
-.queue-table th, .queue-table td {
+.queue-table th {
     padding: 0.9rem 1.5rem;
+}
+
+.queue-table td {
+    padding: 0.9rem 1.5rem;
+    font-size: 1.15rem;
+    font-weight: 600;
 }
 
 .queue-table th {
@@ -378,8 +382,17 @@ input:checked + .slider:before {
 }
 
 .row-playing td {
-    font-weight: 600;
-    font-size: 1.25rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.row-completed {
+    opacity: 0.55;
+}
+
+.row-completed td:not(:last-child) {
+    text-decoration: line-through;
+    color: var(--accent-red);
 }
 
 /* Empty or Loading State */

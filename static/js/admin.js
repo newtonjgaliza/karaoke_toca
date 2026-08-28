@@ -203,11 +203,9 @@ function updateRequestStatusUI(enabled) {
 // Atualiza cartões de estatísticas no painel lateral
 function updateStats() {
     const pendingCount = localQueue.filter(item => item.status === 'pending').length;
-    const playingCount = localQueue.filter(item => item.status === 'playing').length;
     const completedCount = localQueue.filter(item => item.status === 'completed').length;
 
     document.querySelector('#stat-pending .stat-value').textContent = pendingCount;
-    document.querySelector('#stat-playing .stat-value').textContent = playingCount;
     document.querySelector('#stat-completed .stat-value').textContent = completedCount;
 }
 
@@ -248,6 +246,8 @@ function renderQueueTable() {
         const tr = document.createElement('tr');
         if (item.status === 'playing') {
             tr.className = 'row-playing';
+        } else if (item.status === 'completed') {
+            tr.className = 'row-completed';
         }
 
         let actionsHtml = '';
