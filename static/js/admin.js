@@ -88,6 +88,7 @@ async function fetchQueue() {
 
         renderQueueTable();
         updateStats();
+        updateRanking();
     } catch (error) {
         console.error('Erro ao buscar a fila do Supabase:', error);
     } finally {
@@ -207,6 +208,76 @@ function updateStats() {
 
     document.querySelector('#stat-pending .stat-value').textContent = pendingCount;
     document.querySelector('#stat-completed .stat-value').textContent = completedCount;
+}
+
+// Atualiza a seção de ranking dos cantores no painel lateral
+function updateRanking() {
+    const rankList = document.getElementById('rankList');
+    if (!rankList) return;
+
+    // Filtra pedidos válidos (não cancelados e com nome preenchido)
+    const validRequests = localQueue.filter(item => item.status !== 'cancelled' && item.name && item.name.trim() !== '');
+
+    // Agrupa e conta por nome (case-insensitive para agrupar, mas mantendo a capitalização original)
+    const counts = {};
+    const originalNames = {};
+
+    validRequests.forEach(item => {
+        const cleanName = item.name.trim();
+        const lowerName = cleanName.toLowerCase();
+        
+        counts[lowerName] = (counts[lowerName] || 0) + 1;
+        if (!originalNames[lowerName]) {
+            originalNames[lowerName] = cleanName;
+        }
+    });
+
+    // Converte para array e ordena decrescentemente
+    const rankedUsers = Object.keys(counts).map(lowerName => {
+        return {
+            name: originalNames[lowerName],
+            count: counts[lowerName]
+        };
+    }).sort((a, b) => b.count - a.count);
+
+    if (rankedUsers.length === 0) {
+        rankList.innerHTML = '<div class="rank-empty">Nenhum pedido realizado.</div>';
+        return;
+    }
+
+    // Pega os top 5 cantores
+    const topFive = rankedUsers.slice(0, 5);
+    rankList.innerHTML = '';
+
+    topFive.forEach((user, index) => {
+        const position = index + 1;
+        let rankClass = '';
+        let medal = '';
+
+        if (position === 1) {
+            rankClass = 'rank-1st';
+            medal = '🥇';
+        } else if (position === 2) {
+            rankClass = 'rank-2nd';
+            medal = '🥈';
+        } else if (position === 3) {
+            rankClass = 'rank-3rd';
+            medal = '🥉';
+        } else {
+            medal = `${position}º`;
+        }
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `rank-item ${rankClass}`;
+        itemDiv.innerHTML = `
+            <div class="rank-user">
+                <span class="rank-position">${medal}</span>
+                <span class="rank-name" title="${escapeHtml(user.name)}">${escapeHtml(user.name)}</span>
+            </div>
+            <span class="rank-count">${user.count} ${user.count === 1 ? 'música' : 'músicas'}</span>
+        `;
+        rankList.appendChild(itemDiv);
+    });
 }
 
 // Filtra a fila utilizando a barra de pesquisa
