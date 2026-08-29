@@ -50,15 +50,61 @@ function updateRequestsUI() {
     }
 }
 
-const COOLDOWN_MS = 20 * 60 * 1000; // 20 minutos em milissegundos
+const SESSION_LIMIT_MS = 12 * 60 * 60 * 1000; // 12 horas para resetar o histórico de pedidos de uma noite
 
 // Retorna o tempo restante de cooldown em milissegundos (ou 0 se não estiver em cooldown)
 function getRemainingCooldownTime() {
-    const lastRequestTime = localStorage.getItem('lastRequestTime');
-    if (!lastRequestTime) return 0;
+    let historyStr = localStorage.getItem('requestHistory');
     
-    const elapsed = Date.now() - parseInt(lastRequestTime, 10);
-    const remaining = COOLDOWN_MS - elapsed;
+    // Migração do sistema legado de cooldown único
+    if (!historyStr) {
+        const legacyLastRequest = localStorage.getItem('lastRequestTime');
+        if (legacyLastRequest) {
+            const parsed = parseInt(legacyLastRequest, 10);
+            if (!isNaN(parsed)) {
+                const legacyHistory = [parsed];
+                localStorage.setItem('requestHistory', JSON.stringify(legacyHistory));
+                historyStr = JSON.stringify(legacyHistory);
+            }
+        }
+    }
+
+    if (!historyStr) return 0;
+    
+    let history = [];
+    try {
+        history = JSON.parse(historyStr);
+        if (!Array.isArray(history)) history = [];
+    } catch (e) {
+        history = [];
+    }
+
+    // Filtra para manter apenas pedidos feitos nas últimas 12 horas (sessão atual)
+    const now = Date.now();
+    history = history.filter(time => now - time < SESSION_LIMIT_MS);
+    
+    // Salva o histórico limpo de volta no localStorage
+    localStorage.setItem('requestHistory', JSON.stringify(history));
+
+    if (history.length === 0) return 0;
+
+    const lastRequestTime = history[history.length - 1];
+    const elapsed = now - lastRequestTime;
+
+    // Define o tempo de cooldown com base no número de pedidos anteriores nesta sessão:
+    // - 1 pedido no histórico: cooldown de 30 minutos para pedir a 2ª
+    // - 2 pedidos no histórico: cooldown de 30 minutos para pedir a 3ª
+    // - 3 ou mais pedidos no histórico: cooldown de 1 hora para pedir a 4ª e seguintes
+    let cooldownMs = 0;
+    if (history.length === 1) {
+        cooldownMs = 30 * 60 * 1000; 
+    } else if (history.length === 2) {
+        cooldownMs = 30 * 60 * 1000;
+    } else {
+        cooldownMs = 60 * 60 * 1000;
+    }
+
+    const remaining = cooldownMs - elapsed;
     return remaining > 0 ? remaining : 0;
 }
 
@@ -76,14 +122,14 @@ document.getElementById('requestForm').addEventListener('submit', async function
         return;
     }
 
-    // Verifica se o dispositivo está no período de cooldown de 20 minutos
+    // Verifica se o dispositivo está em período de cooldown
     const remainingTime = getRemainingCooldownTime();
     if (remainingTime > 0) {
         const minutes = Math.floor(remainingTime / 60000);
         const seconds = Math.floor((remainingTime % 60000) / 1000);
         const formattedTime = `${minutes}m ${seconds}s`;
         
-        document.getElementById('cooldownMessage').textContent = `Você já enviou um pedido recentemente. Para evitar sobrecarregar a fila, por favor aguarde mais ${formattedTime} antes de pedir outra música!`;
+        document.getElementById('cooldownMessage').textContent = `Para evitar sobrecarregar a fila, por favor aguarde mais ${formattedTime} antes de pedir outra música!`;
         document.getElementById('cooldownModal').style.display = 'flex';
         return;
     }
@@ -116,8 +162,25 @@ document.getElementById('requestForm').addEventListener('submit', async function
 
         if (error) throw error;
 
-        // Salva o timestamp do pedido no localStorage para o cooldown
-        localStorage.setItem('lastRequestTime', Date.now().toString());
+        // Salva o timestamp do pedido no histórico do localStorage
+        const now = Date.now();
+        localStorage.setItem('lastRequestTime', now.toString()); // Mantém compatibilidade legado se necessário
+
+        let history = [];
+        try {
+            const historyStr = localStorage.getItem('requestHistory');
+            if (historyStr) {
+                history = JSON.parse(historyStr);
+                if (!Array.isArray(history)) history = [];
+            }
+        } catch (e) {
+            history = [];
+        }
+        
+        // Mantém histórico limpo das últimas 12 horas e adiciona novo pedido
+        history = history.filter(time => now - time < SESSION_LIMIT_MS);
+        history.push(now);
+        localStorage.setItem('requestHistory', JSON.stringify(history));
 
         // Abre o modal de sucesso
         document.getElementById('successModal').style.display = 'flex';
