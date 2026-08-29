@@ -1,4 +1,4 @@
-const CACHE_NAME = 'toca-karaoke-v3';
+const CACHE_NAME = 'toca-karaoke-v4';
 const ASSETS = [
   './',
   './index.html',

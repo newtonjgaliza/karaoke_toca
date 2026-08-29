@@ -1,4 +1,42 @@
 let requestsEnabled = false;
+let clientIp = 'unknown';
+let deviceId = '';
+
+// Gera ou recupera o ID único do dispositivo
+function getOrCreateDeviceId() {
+    let id = localStorage.getItem('karaoke_device_id');
+    if (!id) {
+        id = 'dev_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now().toString(36);
+        localStorage.setItem('karaoke_device_id', id);
+    }
+    return id;
+}
+
+// Busca o IP público do cliente
+async function fetchClientIp() {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        const data = await response.json();
+        if (data && data.ip) {
+            clientIp = data.ip;
+        }
+    } catch (e) {
+        console.warn("Não foi possível obter o IP público:", e);
+        clientIp = 'unknown';
+    }
+}
+
+// Formata o campo extra_info para incluir os metadados do dispositivo
+function formatRequestMetadata(extraInfo, devId, ip) {
+    const base = (extraInfo || '').trim();
+    const meta = `__meta__dev:${devId}||ip:${ip}`;
+    return base ? `${base} ${meta}` : meta;
+}
 
 // Inicializa a escuta de mudanças de configuração em tempo real no Supabase
 async function initSettingsSync() {
@@ -145,6 +183,7 @@ document.getElementById('requestForm').addEventListener('submit', async function
     const song = document.getElementById('song').value.trim();
     const reference = document.getElementById('reference').value.trim();
     const extra_info = document.getElementById('extra_info').value.trim();
+    const formattedExtraInfo = formatRequestMetadata(extra_info, deviceId, clientIp);
 
     try {
         // Envia o pedido diretamente para a tabela do Supabase
@@ -155,7 +194,7 @@ document.getElementById('requestForm').addEventListener('submit', async function
                     name: name,
                     song: song,
                     reference: reference,
-                    extra_info: extra_info,
+                    extra_info: formattedExtraInfo,
                     status: 'pending'
                 }
             ]);
@@ -211,6 +250,8 @@ function closeBlockedModal() {
 
 // Inicializa a sincronização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
+    deviceId = getOrCreateDeviceId();
+    fetchClientIp();
     initSettingsSync();
 
     // Polling fallback to ensure settings updates even if Supabase Realtime is disabled or fails
