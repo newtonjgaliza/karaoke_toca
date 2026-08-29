@@ -579,6 +579,37 @@ input:checked + .slider:before {
     color: var(--accent-red);
 }
 
+/* Singer Count Badge */
+.singer-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+}
+
+.singer-count-badge.count-zero {
+    background-color: rgba(46, 224, 14, 0.1);
+    color: #4cd964;
+    border: 1px solid rgba(46, 224, 14, 0.2);
+}
+
+.singer-count-badge.count-has {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.singer-count-badge.count-many {
+    background-color: rgba(227, 175, 102, 0.15);
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+}
+
 /* Action buttons in columns */
 .actions-header {
     text-align: right;

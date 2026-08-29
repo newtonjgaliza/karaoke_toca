@@ -303,7 +303,7 @@ function renderQueueTable() {
     if (filteredQueue.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="empty-state">
+                <td colspan="7" class="empty-state">
                     ${localQueue.length === 0 ? 'Nenhuma música na fila. Aguardando pedidos...' : 'Nenhum pedido correspondente à pesquisa.'}
                 </td>
             </tr>
@@ -362,8 +362,21 @@ function renderQueueTable() {
         }
 
         const requestTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
+        
+        const singerName = item.name ? item.name.trim().toLowerCase() : '';
+        const singerCompletedCount = localQueue.filter(r => 
+            r.status === 'completed' && r.name && r.name.trim().toLowerCase() === singerName
+        ).length;
+
+        let badgeClass = 'count-zero';
+        if (singerCompletedCount > 0) {
+            badgeClass = singerCompletedCount >= 3 ? 'count-many' : 'count-has';
+        }
+        const singerBadgeHtml = `<span class="singer-count-badge ${badgeClass}">${singerCompletedCount}</span>`;
+
         tr.innerHTML = `
             <td>${escapeHtml(item.name)}</td>
+            <td style="text-align: center;">${singerBadgeHtml}</td>
             <td>${escapeHtml(item.song)}</td>
             <td>${escapeHtml(item.reference || '-')}</td>
             <td>${escapeHtml(item.extra_info || '-')}</td>
