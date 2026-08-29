@@ -303,7 +303,7 @@ function renderQueueTable() {
     if (filteredQueue.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="empty-state">
+                <td colspan="6" class="empty-state">
                     ${localQueue.length === 0 ? 'Nenhuma música na fila. Aguardando pedidos...' : 'Nenhum pedido correspondente à pesquisa.'}
                 </td>
             </tr>
@@ -361,11 +361,13 @@ function renderQueueTable() {
             `;
         }
 
+        const requestTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-';
         tr.innerHTML = `
             <td>${escapeHtml(item.name)}</td>
             <td>${escapeHtml(item.song)}</td>
             <td>${escapeHtml(item.reference || '-')}</td>
             <td>${escapeHtml(item.extra_info || '-')}</td>
+            <td>${requestTime}</td>
             <td>${actionsHtml}</td>
         `;
 
