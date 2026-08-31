@@ -598,7 +598,7 @@ function escapeQuote(text) {
 // ==========================================
 // SISTEMA DE AUTENTICAÇÃO SIMPLES (FRONT-END)
 // ==========================================
-const ADMIN_PASSWORD_HASH = "aca3e621a4ad37f877e1799a985926587d9ddac419630b368fb90c39cbb7f197"; // hash de 'tocaadmin'
+const ADMIN_PASSWORD_HASH = "3e621a4ad37f877e1799a985926587d9ddac419630b368fb90c39cbb7f197"; // hash de 'tocaadmin'
 let isSyncInitialized = false;
 let pollingIntervals = [];
 
